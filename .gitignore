@@ -4,5 +4,7 @@
 /inc
 /startup
 /StdPeriph_Driver
-
+*.c
+*.p
+*.sy
 

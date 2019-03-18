@@ -1,2 +1,8 @@
-/settings
+/.settings
+/CMSIS
+/Debug
+/inc
+/startup
+/StdPeriph_Driver
+
 

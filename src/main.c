@@ -75,6 +75,14 @@ int main (void)
 	TIM_TimeBaseInit(TIM3, &tim); // инициализация таймера
 	TIM_ITConfig(TIM3, TIM_DIER_UIE, ENABLE); // разрешаем прерывания по таймеру
 
+	//прерывания
+	//включаем прерывания таймера
+	NVIC_InitTypeDef nvicInit;
+	NVIC_EnableIRQ(TIM3_IRQn); // разрешаем обработку прерываний
+	nvicInit.NVIC_IRQChannel = TIM3_IRQn; // настраиваем прерывание
+	nvicInit.NVIC_IRQChannelCmd = ENABLE; //включаем прерывание
+	nvicInit.NVIC_IRQChannelPreemptionPriority = 0; // назначаем приоритет прерывания
+	NVIC_Init(&nvicInit);
 
 	// Включение прерывания таймера 3
 	NVIC_EnableIRQ(TIM3_IRQn);

@@ -138,17 +138,16 @@ int main (void)
 void TIM3_IRQHandler(void)
 {
 	// Сбрасываем флаг переполнения таймера
-	TIM3->SR &= ~TIM_SR_UIF; //Clean UIF Flag
+	if(TIM_GetITStatus(TIM3, TIM_IT_Update) == SET){
+		TIM_ClearFlag(TIM3, TIM_IT_Update);
 
-	// Считываем логическое состояние вывода светодиода и инвертируем состояние
-	if ( GPIOC->ODR & GPIO_ODR_ODR13 )
-	{
-		TIM3->ARR = w - 1; //время работы
-		GPIOC->BSRR = GPIO_BSRR_BR13; //выкл
+	//считываем логическое состояние вывода светодиода
+		if(GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_13))
+			//TIM_TimeBaseInit(TIM3, &tim = w - 1;)
+		GPIO_WriteBit(GPIOC, GPIO_Pin_13, Bit_RESET);
+		else
+			//TIM_TimeBaseInit(TIM3, &tim) = d - 1;
+		GPIO_WriteBit(GPIOC_ GPIO_Pin_13, Bit_SET);
 	}
-	else
-	{
-		TIM3->ARR = d - 1; //время ожидания
-		GPIOC->BSRR = GPIO_BSRR_BS13; //вкл
-	}
+
 }

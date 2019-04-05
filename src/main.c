@@ -26,42 +26,43 @@ int main (void)
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
 
 	//кнопка 1 GPIOC, pin15
-	//сбрасываем все в ноль. Т.к. pin15, то CRH - он старший конфигурационный регистр
-	GPIOC->CRH &= ~(GPIO_CRH_MODE15_1 | GPIO_CRH_MODE15_0 | GPIO_CRH_CNF15_1 | GPIO_CRH_CNF15_0);
-	//выставляем MODE [1:0] = 00; и CNF [1:0] = 10; т.к. это pull-down
-	GPIOC->CRH |= GPIO_CRH_CNF15_1;
-	//подтяжка к земле
-	GPIOC->ODR &= ~ GPIO_ODR_ODR15;
+	//объявляем и настраиваем структуру инициализации
+	GPIO_InitTypeDef gpio_init;
+	gpio_init.GPIO_Pin = GPIO_Pin_15;
+	gpio_init.GPIO_Speed = GPIO_Speed_2MHz;
+	gpio_init.GPIO_Mode = GPIO_Mode_IPD; // подтяжка к земле
+	GPIO_Init(GPIOC, &gpio_init); // инициализация
 
 	//кнопка 2, GPIOB, pin12
-	//сбрасываем все в ноль. Т.к. pin12, то CRH - он старший конфигурационный регистр
-	GPIOB->CRH &= ~(GPIO_CRH_MODE12_1 | GPIO_CRH_MODE12_0 | GPIO_CRH_CNF12_1 | GPIO_CRH_CNF12_0);
-	//выставляем MODE [1:0] = 00; и CNF [1:0] = 10; т.к. это pull-down
-	GPIOB->CRH |= GPIO_CRH_CNF12_1;
-	//подтяжка к питанию
-	GPIOB->ODR |= GPIO_ODR_ODR12;
+	//объявляем и настраиваем структуру инициализации
+	GPIO_InitTypeDef gpio_init;
+	gpio_init.GPIO_Pin = GPIO_Pin_12;
+	gpio_init.GPIO_Speed = GPIO_Speed_2MHz;
+	gpio_init.GPIO_Mode = GPIO_Mode_IPU; //подтяжка к питанию
+	GPIO_Init(GPIOB, &gpio_init); //инициализация
 
 	//кнопка 3, GPIOB, pin 15
-	//сбрасываем все в ноль. Т.к. pin15, то CRH - он старший конфигурационный регистр
-	GPIOB->CRH  &= ~(GPIO_CRH_MODE15_1 | GPIO_CRH_MODE15_0 | GPIO_CRH_CNF15_1 | GPIO_CRH_CNF15_0);
-	//выставляем MODE [1:0] = 00; и CNF [1:0] = 10; т.к. это pull-down
-	GPIOB->CRH |= GPIO_CRH_CNF15_1;
-	//подтяжка к земле
-	GPIOB->ODR &= ~ GPIO_ODR_ODR15;
+	//объявляем и настраиваем структуру инициализации
+	GPIO_InitTypeDef gpio_init;
+	gpio_init.GPIO_Pin = GPIO_Pin_15;
+	gpio_init.GPIO_Speed = GPIO_Speed_2MHz;
+	gpio_init.GPIO_Mode = GPIO_Mode_IPD; // подтяжка к земле
+	GPIO_Init(GPIOB, &gpio_init); //инициализация
 
 	//кнопка 4, GPIOA, pin7
-	//сбраываем все в ноль. Т.к. pin7, то CRL - он младший конфигурационный регистр
-	GPIOA->CRL &= ~(GPIO_CRL_MODE7_1 | GPIO_CRL_MODE7_0 | GPIO_CRL_CNF7_1 | GPIO_CRL_CNF7_0);
-	//выставляем MODE [1:0] = 00; и CNF [1:0] = 10; т.к. это pull-down
-	GPIOA->CRL |= GPIO_CRL_CNF7_1;
-	//подтяжка к питанию
-	GPIOA->ODR |= GPIO_ODR_ODR7;
+	//объявляем и настраиваем структуру инициализации
+	GPIO_InitTypeDef gpio_init;
+	gpio_init.GPIO_Pin = GPIO_Pin_7;
+	gpio_init.GPIO_Speed = GPIO_Speed_2MHz;
+	gpio_init.GPIO_Mode = GPIO_Mode_IPU; // подтяжка к питанию
+	GPIO_Init(GPIOA, &gpio_init);//инициализация
 
-	//выставляем в ноль биты светодиода, pin13
-	//сбрасыываем все в ноль.  Т.к. pin13, то CRH - он старший конфигурационный регистр
-	GPIOC->CRH &= ~(GPIO_CRH_MODE13_1 | GPIO_CRH_MODE13_0 | GPIO_CRH_CNF13_1 | GPIO_CRH_CNF13_0);
-	//выставляем MODE [1:0] = 10; и CNF [1:0] = 00; и берем MODE [1:0]  с минимальной выходной скоростью 2MHz
-	GPIOC->CRH |= GPIO_CRH_MODE13_1;
+	//светодиод
+	GPIO_InitTypeDef gpio_init;
+	gpio_init.GPIO_Pin = GPIO_Pin_13;
+	gpio_init.GPIO_Speed = GPIO_Speed_2MHz;
+	gpio_init.GPIO_Mode = GPIO_Mode_Out_PP; //выход двух состояний (push-pull)
+	GPIO_Init(GPIOC, &gpio_init);
 
 	//включаем тактирование таймера
 	RCC->APB1ENR |= RCC_APB1ENR_TIM3EN;

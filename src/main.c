@@ -64,15 +64,17 @@ int main (void)
 	gpio_init.GPIO_Mode = GPIO_Mode_Out_PP; //выход двух состояний (push-pull)
 	GPIO_Init(GPIOC, &gpio_init);
 
+	//таймер
 	//включаем тактирование таймера
-	RCC->APB1ENR |= RCC_APB1ENR_TIM3EN;
+	RCC_APB1PeriphResetCmd(RCC_APB1Periph_TIM3, ENABLE);
+	TIM_TimeBaseInitTypeDef tim; //начало работы с таймером
+	tim.TIM_ClockDivision = TIM_CKD_DIV1; //таймер затактирован без деления частоты - делитель равен 1, TIM_CKD_DIV1
+	tim.TIM_CounterMode = TIM_CounterMode_Up; //отсчет от нуля до TIM_Period - счет вверх
+	tim.TIM_Period = d - 1;
+	tim.TIM_Prescaler = 36000 - 1;
+	TIM_TimeBaseInit(TIM3, &tim); // инициализация таймера
+	TIM_ITConfig(TIM3, TIM_DIER_UIE, ENABLE); // разрешаем прерывания по таймеру
 
-	// Запускаем таймер на тактовой частоте в 1000 Hz
-	TIM3->PSC = 36000 - 1;
-	// Период - 500мс тактов => 500/1000 = 0,5 Hz (начинаем с ожидания, поэтому delay)
-	TIM3->ARR = d - 1;
-	// Разрешаем прерывания по переполнению таймера
-	TIM3->DIER |= TIM_DIER_UIE;
 
 	// Включение прерывания таймера 3
 	NVIC_EnableIRQ(TIM3_IRQn);

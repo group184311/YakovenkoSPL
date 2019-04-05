@@ -18,10 +18,12 @@ uint16_t past; // значение предыдущей итерации
 
 int main (void)
 {
-	// включаем тактирование портов
-	RCC->APB2ENR |= RCC_APB2ENR_IOPCEN; // тактирование порта С
-	RCC->APB2ENR |= RCC_APB2ENR_IOPBEN; // тактирование порта B
-	RCC->APB2ENR |= RCC_APB2ENR_IOPAEN; // тактирование порта A
+	//тактирование порта С
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE);
+	//тактирование порта В
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
+	//тактирование порта А
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
 
 	//кнопка 1 GPIOC, pin15
 	//сбрасываем все в ноль. Т.к. pin15, то CRH - он старший конфигурационный регистр

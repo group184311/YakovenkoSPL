@@ -84,49 +84,45 @@ int main (void)
 	nvicInit.NVIC_IRQChannelPreemptionPriority = 0; // назначаем приоритет прерывания
 	NVIC_Init(&nvicInit);
 
-	// Включение прерывания таймера 3
-	NVIC_EnableIRQ(TIM3_IRQn);
+	uint32_t past = GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_15); //предыдущая итерация первой кнопки
 
-	//включем таймер
-	TIM3->CR1 |= TIM_CR1_CEN;
-
-	past = GPIOC->IDR & GPIO_IDR_IDR15; // значение предыдущей итерации первой кнопки (PIN15, GPIOC)
 
 	for(;;) {
 
-		now = GPIOC->IDR & GPIO_IDR_IDR15; // значение нынешнего состояния первой кнопки (PIN15, GPIOC)
+		uint32_t now = GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_15); //значение нынешнего состояния первой кнопки (PIN15, GPIOC)
 
 		if (now != past ) // если значение нанышней итерации не равно значению предыдущей итерации, то
 		{
-			TIM3->CR1 &= ~ TIM_CR1_CEN; // выключаем таймер
-			GPIOC->BSRR = GPIO_BSRR_BR13; //выкл
+			TIM_Cmd(TIM3, DISABLE); //выключаем таймер
+			GPIO_WriteBit(GPIOC, GPIO_Pin_13, Bit_RESET); //выкл
 
-			if (now == GPIO_IDR_IDR15) //если значение нынешней итерации равно единице (т.е. она нажата)
+			if ( now == GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_15)) //если значение нынешней итерации равно единице (т.е. она нажата)
 			{
-				TIM3->ARR = UINT16_MAX; // назначаем период счета таймера максимальным
+				TIM_TimeBaseInit(TIM3, &tim) = UINT16_MAX; // назначаем период счета таймера максимальным
 			}
 			else
 			{
-				if (TIM3->CNT >= 200) // если счетчик больше минимального значения (200 мс)
-				{ d = TIM3->CNT; } // то тогда мы можем присвоить задержку  (то что мы насчитали)
+				if (TIM_GetCounter(TIM3) >=200) // если счетчик больше минимального значения (200 мс)
+				{
+					d = uint32_t TIM_GetCounter(TIM3); // то тогда мы можем присвоить задержку  (то что мы насчитали)
+				}
 			}
-			TIM3->CNT = 0; // обнуление счетчика
-			TIM3->CR1 |= TIM_CR1_CEN; // включение таймера
+			TIM_SetCounter(TIM3, 0); // обнуление счетчика
+			TIM_Cmd(TIM3, ENABLE); // включение таймера
 			past = now; // значение предыдущей итерации равно значению нынешней итерации
 		}
 
 
-
-		if (!(GPIOB->IDR & GPIO_IDR_IDR12)) //если кнопка нажата, то пишем значение переменной отвечащей за работу,
+		if (!GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_12)) //если кнопка нажата, то пишем значение переменной отвечащей за работу,
 											//равной определенному значению работы (подтяжка к питанию)
 		{
 			w = 1000; //работа для кнопки с PIN12 GPIOB равная работе 1000 мс
 		}
-		else if(GPIOB->IDR & GPIO_IDR_IDR15) //(подтяжка к земле)
+		else if(GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_15)) //(подтяжка к земле)
 		{
 			w = 1500; //работа для кнопки с PIN15 GPIOB равная работе 1500 мс
 		}
-		else if(!(GPIOA->IDR & GPIO_IDR_IDR7)) //(подтяжка к питанию)
+		else if(!GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_7)) //(подтяжка к питанию)
 		{
 			w = 2000; //работа для кнопки с PIN7 GPIOА равная работе 2000 мс
 		}

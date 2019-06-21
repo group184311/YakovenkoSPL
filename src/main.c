@@ -35,7 +35,6 @@ int main (void)
 
 	//кнопка 2, GPIOB, pin12
 	//объявляем и настраиваем структуру инициализации
-	GPIO_InitTypeDef gpio_init;
 	gpio_init.GPIO_Pin = GPIO_Pin_12;
 	gpio_init.GPIO_Speed = GPIO_Speed_2MHz;
 	gpio_init.GPIO_Mode = GPIO_Mode_IPU; //подтяжка к питанию
@@ -43,7 +42,6 @@ int main (void)
 
 	//кнопка 3, GPIOB, pin 15
 	//объявляем и настраиваем структуру инициализации
-	GPIO_InitTypeDef gpio_init;
 	gpio_init.GPIO_Pin = GPIO_Pin_15;
 	gpio_init.GPIO_Speed = GPIO_Speed_2MHz;
 	gpio_init.GPIO_Mode = GPIO_Mode_IPD; // подтяжка к земле
@@ -51,14 +49,12 @@ int main (void)
 
 	//кнопка 4, GPIOA, pin7
 	//объявляем и настраиваем структуру инициализации
-	GPIO_InitTypeDef gpio_init;
 	gpio_init.GPIO_Pin = GPIO_Pin_7;
 	gpio_init.GPIO_Speed = GPIO_Speed_2MHz;
 	gpio_init.GPIO_Mode = GPIO_Mode_IPU; // подтяжка к питанию
 	GPIO_Init(GPIOA, &gpio_init);//инициализация
 
 	//светодиод
-	GPIO_InitTypeDef gpio_init;
 	gpio_init.GPIO_Pin = GPIO_Pin_13;
 	gpio_init.GPIO_Speed = GPIO_Speed_2MHz;
 	gpio_init.GPIO_Mode = GPIO_Mode_Out_PP; //выход двух состояний (push-pull)
@@ -98,13 +94,13 @@ int main (void)
 
 			if ( now == GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_15)) //если значение нынешней итерации равно единице (т.е. она нажата)
 			{
-				TIM_TimeBaseInit(TIM3, &tim) = UINT16_MAX; // назначаем период счета таймера максимальным
+				tim.TIM_Period = UINT16_MAX; // назначаем период счета таймера максимальным
 			}
 			else
 			{
 				if (TIM_GetCounter(TIM3) >=200) // если счетчик больше минимального значения (200 мс)
 				{
-					d = uint32_t TIM_GetCounter(TIM3); // то тогда мы можем присвоить задержку  (то что мы насчитали)
+					d = TIM_GetCounter(TIM3); // то тогда мы можем присвоить задержку  (то что мы насчитали)
 				}
 			}
 			TIM_SetCounter(TIM3, 0); // обнуление счетчика
@@ -130,7 +126,6 @@ int main (void)
 		{
 			w=500;
 		}
-
 	}
 }
 
@@ -143,11 +138,13 @@ void TIM3_IRQHandler(void)
 
 	//считываем логическое состояние вывода светодиода
 		if(GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_13))
-			//TIM_TimeBaseInit(TIM3, &tim = w - 1;)
+			TIM3->ARR= w - 1; //настраиваем период моргания таймера для работы
 		GPIO_WriteBit(GPIOC, GPIO_Pin_13, Bit_RESET);
-		else
-			//TIM_TimeBaseInit(TIM3, &tim) = d - 1;
-		GPIO_WriteBit(GPIOC_ GPIO_Pin_13, Bit_SET);
+		return;
 	}
-
+		else
+		{
+			TIM3->ARR = d-1; //настраиваем период работы таймера для задержки
+		GPIO_WriteBit(GPIOC, GPIO_Pin_13, Bit_SET);
+	}
 }

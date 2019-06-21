@@ -1,0 +1,13 @@
+/.settings
+/CMSIS
+/Debug
+/StdPeriph_Driver
+/inc
+/startup
+/StdPeriph_Driver
+*.cproject
+*.project
+*LinkerScript.ld
+*jakovenko_stm32f13c8t6.xml
+*lab2.1 Debug.cfg
+

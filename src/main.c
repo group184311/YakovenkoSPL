@@ -17,15 +17,15 @@ UART_HandleTypeDef huart2;
 //буфер на прием; fifo1,
 #define RX_BUFFER_SIZE 350 //размер буфера
 volatile uint8_t fifo1[RX_BUFFER_SIZE];
-volatile uint16_t rx_tail_fifo1=0, rx_head_fifo1=0;//хвост буфера (куда записываем данные) и начало буфера (откуда читаем данные)
-volatile uint16_t rx_count_fifo1= 0; //количество данных в буфере
-volatile uint8_t rx_overflow_fifo1=0; //инфа о переполнении буфера
+volatile uint16_t tail1=0, head1=0;//хвост буфера (куда записываем данные) и начало буфера (откуда читаем данные)
+volatile uint16_t count1= 0; //количество данных в буфере
+volatile uint8_t owerflow1=0; //инфа о переполнении буфера
 
 //буфер на передачу; fifo2
 #define TX_BUFFER_SIZE 350 //размер буфера
 volatile uint8_t fifo2[TX_BUFFER_SIZE];
-volatile uint16_t tx_tail_fifo2=0, tx_head_fifo2=0;//хвост буфера (куда записываем данные) и начало буфера (откуда читаем данные)
-volatile uint16_t tx_count_fifo2= 0; //количество данных в буфере
+volatile uint16_t tail2=0, head2=0;//хвост буфера (куда записываем данные) и начало буфера (откуда читаем данные)
+volatile uint16_t count2= 0; //количество данных в буфере
 
 
 void SystemClock_Config(void);
@@ -175,7 +175,7 @@ void GreenLedGPIO_Init()
 
 void HAL_UART_MspInit(UART_HandleTypeDef* huart)
 {
-  GPIO_InitTypeDef GPIO_InitStructUart = {0};
+  GPIO_InitTypeDef GPIO_InitStructUart;
   if(huart->Instance==USART1)
   {
 	  //настраиваем USART1
@@ -225,15 +225,9 @@ void HAL_MspInit(void)
   __HAL_RCC_AFIO_CLK_ENABLE();
   __HAL_RCC_PWR_CLK_ENABLE();
 
-  /* System interrupt init*/
 
-  /** NOJTAG: JTAG-DP Disabled and SW-DP Enabled
-  */
   __HAL_AFIO_REMAP_SWJ_NOJTAG();
 
-  /* USER CODE BEGIN MspInit 1 */
-
-  /* USER CODE END MspInit 1 */
 }
 
 
@@ -284,11 +278,11 @@ void USART2_IRQHandler(void)
 uint8_t get_char(void)
 {
 	uint8_t receive_data_1; // переменная для данных
-		while (rx_count_fifo1 == 0); // если данных нет - ожидание
-		receive_data_1 = fifo1[rx_head_fifo1++]; // берем данные из буфера
-				if (rx_head_fifo1 == RX_BUFFER_SIZE) rx_head_fifo1 = 0; // перебираем по кругу
+		while (count1 == 0); // если данных нет - ожидание
+		receive_data_1 = fifo1[head1++]; // берем данные из буфера
+				if (head1 == RX_BUFFER_SIZE) head1 = 0; // перебираем по кругу
 					USART_ITConfig(USART2, USART_IT_RXNE, DISABLE); // запрещаем прерывание
-					rx_count_fifo1--;
+					count--;
 					USART_ITConfig(USART1, USART_IT_RXNE, ENABLE); // разрешаем прерывание
 				return receive_data_1;
 }
@@ -296,12 +290,12 @@ uint8_t get_char(void)
 //3.кладем символ из буфера
 void put_char(uint8_t receive_data_2)
 {
-	while (tx_count_fifo2 == TX_BUFFER_SIZE);//если буфер переполнен - ожидание
+	while (count2 == TX_BUFFER_SIZE);//если буфер переполнен - ожидание
 		USART_ITConfig(USART1, USART_IT_TXE, DISABLE); //запрещаем прерывание
-		if (tx_count_fifo2 || (USART_GetFlagStatus(USART1, USART_FLAG_TXE) == RESET)) //если в буфер уже что-то передается
+		if (count2 || (USART_GetFlagStatus(USART1, USART_FLAG_TXE) == RESET)) //если в буфер уже что-то передается
 		{
-			fifo2[tx_tail_fifo2++] = receive_data_2; //кладем данные в буфер
-			if(tx_tail_fifo2 == TX_BUFFER_SIZE) tx_tail_fifo2 = 0; //перебираем по кругу
+			fifo2[tail2++] = receive_data_2; //кладем данные в буфер
+			if(tail2 == TX_BUFFER_SIZE) tail = 0; //перебираем по кругу
 			USART_ITConfig(USART2, USART_IT_TXE, ENABLE);//разрешаем прерывание
 		}
 		else
@@ -313,5 +307,7 @@ void Error_Handler()
 {
 	  while(1)
 	  {
-}
+		  HAL_GPIO_TOGGLE(GPIOC, GPIO_PIN_13);
+		  HAL_Delay(100);
+	  }
 }
